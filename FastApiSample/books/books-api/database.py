@@ -1,9 +1,12 @@
-from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, select
+from sqlalchemy import (
+    create_engine, ForeignKey, Column, Integer, String
+)
 from sqlalchemy.orm import registry, relationship, Session
+from sqlalchemy.future import select
 
 engine = create_engine("mysql+mysqlconnector://test:test@localhost:3306/books", echo=True)
 
-mapper_registry =  registry()                          
+mapper_registry = registry()
 Base = mapper_registry.generate_base()
 
 
@@ -13,13 +16,13 @@ class Author(Base):
     author_id = Column(Integer, primary_key=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
-    
-    
+
     def __repr__(self):
         return f"""
         <Author(id={self.id}, first_name={self.first_name}, 
             last_name={self.last_name})>
             """
+
 
 # Define books table
 class Book(Base):
@@ -31,6 +34,7 @@ class Book(Base):
 
     def __repr__(self):
         return f"<Book(book_id={self.book_id}, title={self.title}, num_of_pages={self.number_of_pages})"
+
 
 class BookAuthor(Base):
     __tablename__ = 'bookauthors'
@@ -55,7 +59,7 @@ class BookAuthor(Base):
 Base.metadata.create_all(engine)
 
 
-def add_book(book: Book, author: Author):
+async def add_book(book: Book, author: Author):
     with Session(engine) as session:
         existing_book = session.execute(
             select(Book).filter(Book.title == book.title, Book.number_of_pages == book.number_of_pages)).scalar()
@@ -82,7 +86,7 @@ def add_book(book: Book, author: Author):
         print("New pairing added " + str(pairing))
 
 
-def get_book(book_id: int):
+async def get_book(book_id: int):
     with Session(engine) as session:
         book = session.execute(select(Book).filter(Book.book_id == book_id)).scalar()
         if book is None:

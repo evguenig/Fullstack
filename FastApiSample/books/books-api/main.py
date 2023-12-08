@@ -27,17 +27,17 @@ def get_root():
 
 
 @app.get("/book/{book_id}")
-def retrieve_book(book_id: int):
+async def retrieve_book(book_id: int):
     try:
-        return database.get_book(book_id)
+        return await database.get_book(book_id)
     except Exception as e:
         print(e)
         raise HTTPException(status_code=404, detail=repr(e))
 
 
 @app.post("/book/")
-def create_book(request: schemas.BookAuthorPayload):
-    database.add_book(convert_into_book_db_model(request.book), convert_into_author_db_model(request.author))
+async def create_book(request: schemas.BookAuthorPayload):
+    await database.add_book(convert_into_book_db_model(request.book), convert_into_author_db_model(request.author))
     return "New book added " + request.book.title + " " + str(request.book.number_of_pages) + " " \
         + " New author added " + request.author.first_name + " " + request.author.last_name
 
